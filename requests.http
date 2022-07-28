@@ -1,0 +1,19 @@
+POST http://127.0.0.1:8080/register/
+Content-Type: application/json
+
+{
+  "username": "userpp",
+  "password": "1234fF#1D",
+  "email": "my_mailzs@mail.ru"
+}
+
+###
+
+GET http://127.0.0.1:8080/get-token/
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "1234fF#1D",
+  "email": "my_mailzs@mail.ru"
+}
