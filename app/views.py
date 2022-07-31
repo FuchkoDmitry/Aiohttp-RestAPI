@@ -4,9 +4,9 @@ import bcrypt
 from aiohttp import web
 from asyncpg.exceptions import UniqueViolationError
 
-from app.error_handlers import BadRequest, Unauthorized
-from app.models import User
-from app.validators import validate, GetTokenValidate, CreateUserValidate
+from app.error_handlers import BadRequest, Unauthorized, Forbidden
+from app.models import User, Advertisement
+from app.validators import validate, GetTokenValidate, CreateUserValidate, CreateAdvertisementModel
 
 
 class UsersView(web.View):
@@ -39,5 +39,58 @@ class UsersView(web.View):
             raise BadRequest(
                 error="user with this username/e-mail already exists."
             )
+
+
+class AdvertisementsView(web.View):
+
+    async def get(self):
+        adv_id = self.request.match_info.get("adv_id")
+        if adv_id is None:
+            advertisements = await Advertisement.query.where(
+                Advertisement.is_active == True
+            ).gino.all()
+            return web.json_response([advertisement.to_dict() for advertisement in advertisements])
+        try:
+            advertisement = await Advertisement.query.where(
+                and_(
+                    Advertisement.id == int(adv_id),
+                    Advertisement.is_active == True
+                )
+            ).gino.first()
+            return web.json_response(advertisement.to_dict())
+        except AttributeError:
+            raise BadRequest(error="incorrect advertisement id")
+
+    async def post(self):
+        unvalidated_data = await self.request.json()
+        unvalidated_data['token'] = self.request.headers.get('Authorization')
+        validated_data = validate(unvalidated_data, CreateAdvertisementModel)
+        user_id = await User.get_id(validated_data.pop('token'))
+        if user_id is None:
+            raise BadRequest(error="incorrect token")
+        new_adv = await Advertisement.create(owner_id=user_id, **validated_data)
+        return web.json_response(new_adv.to_dict())
+
+    async def patch(self):
+        pass
+
+    async def delete(self):
+        token = self.request.headers.get('Authorization')
+        if token is None:
+            raise Unauthorized(error="token is required")
+        adv_id = int(self.request.match_info.get("adv_id"))
+        user_id = await User.get_id(token.replace('Token ', ''))
+        advertisement = await Advertisement.query.where(
+            and_(
+                Advertisement.id == adv_id,
+                Advertisement.is_active == True
+            )
+        ).gino.first()
+        if advertisement is None:
+            raise BadRequest(error="incorrect advertisement id")
+        elif advertisement.owner_id != user_id:
+            raise Forbidden(error="permission denied")
+        await advertisement.update(is_active=False).apply()
+        return web.json_response(status=204)
 
 

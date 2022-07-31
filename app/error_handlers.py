@@ -16,3 +16,7 @@ class BadRequest(HttpError):
 
 class Unauthorized(HttpError):
     status_code = 401
+
+
+class Forbidden(HttpError):
+    status_code = 403

@@ -53,6 +53,18 @@ class CreateUserValidate(BaseModel):
         return value
 
 
+class CreateAdvertisementModel(BaseModel):
+    title: str
+    description: str
+    token: str = None
+
+    @pydantic.validator('token')
+    def check_token(cls, value: str):
+        if value is None:
+            raise ValueError("token is required")
+        return value.replace('Token ', '')
+
+
 def validate(unvalidated_data: dict, validation_model):
     try:
         return dict(validation_model(**unvalidated_data))
