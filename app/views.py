@@ -6,7 +6,14 @@ from asyncpg.exceptions import UniqueViolationError
 
 from app.error_handlers import BadRequest, Unauthorized, Forbidden
 from app.models import User, Advertisement
-from app.validators import validate, GetTokenValidate, CreateUserValidate, CreateAdvertisementModel
+from app.validators import (
+    validate,
+    GetTokenValidate,
+    CreateUserValidate,
+    CreateAdvertisementModel,
+    UpdateAdvertisementModel,
+    CheckToken,
+)
 
 
 class UsersView(web.View):
@@ -72,25 +79,29 @@ class AdvertisementsView(web.View):
         return web.json_response(new_adv.to_dict())
 
     async def patch(self):
-        pass
+        unvalidated_data = await self.request.json()
+        unvalidated_data['token'] = self.request.headers.get('Authorization')
+        validated_data = validate(unvalidated_data, UpdateAdvertisementModel)
+        adv_id = int(self.request.match_info.get("adv_id"))
+        advertisement_owner = await Advertisement.is_owner(
+            validated_data.pop('token'), adv_id)
+        if advertisement_owner is None:
+            raise BadRequest(error="incorrect advertisement id")
+        elif not advertisement_owner:
+            raise Forbidden(error="permission denied")
+        await advertisement_owner.update(**validated_data).apply()
+        return web.json_response(advertisement_owner.to_dict())
 
     async def delete(self):
         token = self.request.headers.get('Authorization')
-        if token is None:
-            raise Unauthorized(error="token is required")
+        validated_data = validate({'token': token}, CheckToken)
         adv_id = int(self.request.match_info.get("adv_id"))
-        user_id = await User.get_id(token.replace('Token ', ''))
-        advertisement = await Advertisement.query.where(
-            and_(
-                Advertisement.id == adv_id,
-                Advertisement.is_active == True
-            )
-        ).gino.first()
-        if advertisement is None:
+        advertisement_owner = await Advertisement.is_owner(
+            validated_data.pop('token'), adv_id)
+
+        if advertisement_owner is None:
             raise BadRequest(error="incorrect advertisement id")
-        elif advertisement.owner_id != user_id:
+        elif not advertisement_owner:
             raise Forbidden(error="permission denied")
-        await advertisement.update(is_active=False).apply()
+        await advertisement_owner.update(is_active=False).apply()
         return web.json_response(status=204)
-
-

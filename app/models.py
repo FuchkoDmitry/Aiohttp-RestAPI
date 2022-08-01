@@ -54,3 +54,19 @@ class Advertisement(db.Model):
             "description": self.description,
             "owner_id": self.owner_id
         }
+
+    @classmethod
+    async def is_owner(cls, user_token: str, adv_id: int):
+        user_id = await User.get_id(user_token)
+        advertisement = await Advertisement.query.where(
+            and_(
+                Advertisement.id == adv_id,
+                Advertisement.is_active == True
+            )
+        ).gino.first()
+        if advertisement is None:
+            return None
+        elif advertisement.owner_id != user_id:
+            return False
+        return advertisement
+

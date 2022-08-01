@@ -1,9 +1,10 @@
 import re
+import typing
 
 import pydantic
 from pydantic import BaseModel, root_validator, ValidationError
 
-from app.error_handlers import Unauthorized, HttpError, BadRequest
+from app.error_handlers import BadRequest
 
 
 email_regex = re.compile(
@@ -30,7 +31,7 @@ class GetTokenValidate(BaseModel):
     @root_validator
     def check_fields(cls, values):
         if values.get('email') is None and values.get('username') is None:
-            raise ValueError("username or e-mail is required fields")
+            raise ValueError("username or e-mail must be defined")
         return values
 
 
@@ -53,9 +54,7 @@ class CreateUserValidate(BaseModel):
         return value
 
 
-class CreateAdvertisementModel(BaseModel):
-    title: str
-    description: str
+class CheckToken(BaseModel):
     token: str = None
 
     @pydantic.validator('token')
@@ -63,6 +62,22 @@ class CreateAdvertisementModel(BaseModel):
         if value is None:
             raise ValueError("token is required")
         return value.replace('Token ', '')
+
+
+class CreateAdvertisementModel(CheckToken):
+    title: str
+    description: str
+
+
+class UpdateAdvertisementModel(CreateAdvertisementModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+
+    @root_validator
+    def check_fields(cls, values):
+        if values.get('title') is None and values.get('description') is None:
+            raise ValueError("title or description must be defined")
+        return values
 
 
 def validate(unvalidated_data: dict, validation_model):

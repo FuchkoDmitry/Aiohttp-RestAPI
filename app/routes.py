@@ -8,5 +8,6 @@ routes_list = [
     web.post('/advertisements/', AdvertisementsView),
     web.get('/advertisements/{adv_id:\d+}/', AdvertisementsView),
     web.get('/advertisements/', AdvertisementsView),
-    web.delete('/advertisements/{adv_id:\d+}/', AdvertisementsView)
+    web.delete('/advertisements/{adv_id:\d+}/', AdvertisementsView),
+    web.patch('/advertisements/{adv_id:\d+}/', AdvertisementsView)
 ]
