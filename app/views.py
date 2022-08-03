@@ -4,9 +4,9 @@ import bcrypt
 from aiohttp import web
 from asyncpg.exceptions import UniqueViolationError
 
-from app.error_handlers import BadRequest, Unauthorized, Forbidden
-from app.models import User, Advertisement
-from app.validators import (
+from error_handlers import BadRequest, Unauthorized, Forbidden
+from models import User, Advertisement
+from validators import (
     validate,
     GetTokenValidate,
     CreateUserValidate,

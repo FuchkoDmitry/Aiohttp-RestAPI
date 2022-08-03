@@ -1,8 +1,8 @@
-import uuid
 
 import bcrypt
 from gino import Gino
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 db = Gino()
@@ -15,7 +15,7 @@ class User(db.Model):
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    token = db.Column(db.String, default=str(uuid.uuid4()), unique=True)
+    token = db.Column(UUID, server_default=text("gen_random_uuid()"))
     advertisements = relationship('Advertisement')
 
     def check_password(self, password: str):
@@ -31,7 +31,7 @@ class User(db.Model):
         return {
             "id": self.id,
             "username": self.username,
-            "token": self.token
+            "token": str(self.token)
         }
 
 

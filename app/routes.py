@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from app.views import UsersView, AdvertisementsView
+from views import UsersView, AdvertisementsView
 
 routes_list = [
     web.post('/register/', UsersView),

@@ -1,8 +1,7 @@
 from aiohttp import web
 
-from app.routes import routes_list
+from routes import routes_list
 from init_db import init_orm
-
 
 if __name__ == "__main__":
     app = web.Application()

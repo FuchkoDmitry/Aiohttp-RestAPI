@@ -22,7 +22,7 @@ Content-Type: application/json
 # создание объявления
 POST http://127.0.0.1:8080/advertisements/
 Content-Type: application/json
-Authorization: Token ff0ddfbc-2beb-4d0f-9934-e20423d6bd2f
+Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850
 
 {
   "title": "new_adv",
@@ -31,9 +31,9 @@ Authorization: Token ff0ddfbc-2beb-4d0f-9934-e20423d6bd2f
 
 ###
 # обновить объявление
-PATCH http://127.0.0.1:8080/advertisements/9/
+PATCH http://127.0.0.1:8080/advertisements/2/
 Content-Type: application/json
-Authorization: Token ff0ddfbc-2beb-4d0f-9934-e20423d6bd2f
+Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850
 
 {
   "title": "updated title",
@@ -47,12 +47,12 @@ Content-Type: application/json
 
 ###
 # получить одно объявление
-GET http://127.0.0.1:8080/advertisements/5/
+GET http://127.0.0.1:8080/advertisements/1/
 Content-Type: application/json
 
 
 ###
 # удалить объявление
-DELETE http://127.0.0.1:8080/advertisements/5/
+DELETE http://127.0.0.1:8080/advertisements/2/
 Content-Type: application/json
-Authorization: Token 8d98773b-ef39-4710-8ffe-005d823db224
+Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850

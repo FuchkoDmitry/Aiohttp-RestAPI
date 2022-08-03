@@ -4,7 +4,7 @@ import typing
 import pydantic
 from pydantic import BaseModel, root_validator, ValidationError
 
-from app.error_handlers import BadRequest
+from error_handlers import BadRequest
 
 
 email_regex = re.compile(
