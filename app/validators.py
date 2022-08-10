@@ -1,5 +1,5 @@
 import re
-import typing
+from typing import Union, Optional, Any
 
 import pydantic
 from pydantic import BaseModel, root_validator, ValidationError
@@ -54,6 +54,28 @@ class CreateUserValidate(BaseModel):
         return value
 
 
+class CheckUserId(BaseModel):
+    user_id: Union[int, None]
+
+    @pydantic.validator('user_id')
+    def check_id(cls, value):
+        if value is None:
+            raise ValueError("incorrect token")
+        return value
+
+
+class CheckOwner(BaseModel):
+    adv_owner: Any = None
+
+    @pydantic.validator('adv_owner')
+    def check_adv_owner(cls, value):
+        if value is None:
+            raise ValueError("incorrect advertisement id")
+        elif not value:
+            raise ValueError("permission denied")
+        return value
+
+
 class CheckToken(BaseModel):
     token: str = None
 
@@ -61,6 +83,9 @@ class CheckToken(BaseModel):
     def check_token(cls, value: str):
         if value is None:
             raise ValueError("token is required")
+        value = value.replace('Token ', '')
+        if len(value) != 36:
+            raise ValueError("incorrect token")
         return value.replace('Token ', '')
 
 
@@ -70,8 +95,8 @@ class CreateAdvertisementModel(CheckToken):
 
 
 class UpdateAdvertisementModel(CreateAdvertisementModel):
-    title: typing.Optional[str] = None
-    description: typing.Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
 
     @root_validator
     def check_fields(cls, values):

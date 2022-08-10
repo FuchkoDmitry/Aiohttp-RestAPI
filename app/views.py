@@ -4,7 +4,7 @@ import bcrypt
 from aiohttp import web
 from asyncpg.exceptions import UniqueViolationError
 
-from error_handlers import BadRequest, Unauthorized, Forbidden
+from error_handlers import BadRequest, Unauthorized
 from models import User, Advertisement
 from validators import (
     validate,
@@ -12,7 +12,7 @@ from validators import (
     CreateUserValidate,
     CreateAdvertisementModel,
     UpdateAdvertisementModel,
-    CheckToken,
+    CheckToken, CheckUserId, CheckOwner,
 )
 
 
@@ -73,8 +73,7 @@ class AdvertisementsView(web.View):
         unvalidated_data['token'] = self.request.headers.get('Authorization')
         validated_data = validate(unvalidated_data, CreateAdvertisementModel)
         user_id = await User.get_id(validated_data.pop('token'))
-        if user_id is None:
-            raise BadRequest(error="incorrect token")
+        validate({"user_id": user_id}, CheckUserId)
         new_adv = await Advertisement.create(owner_id=user_id, **validated_data)
         return web.json_response(new_adv.to_dict())
 
@@ -82,26 +81,21 @@ class AdvertisementsView(web.View):
         unvalidated_data = await self.request.json()
         unvalidated_data['token'] = self.request.headers.get('Authorization')
         validated_data = validate(unvalidated_data, UpdateAdvertisementModel)
+        user_id = await User.get_id(validated_data.pop('token'))
+        validate({"user_id": user_id}, CheckUserId)
         adv_id = int(self.request.match_info.get("adv_id"))
-        advertisement_owner = await Advertisement.is_owner(
-            validated_data.pop('token'), adv_id)
-        if advertisement_owner is None:
-            raise BadRequest(error="incorrect advertisement id")
-        elif not advertisement_owner:
-            raise Forbidden(error="permission denied")
+        advertisement_owner = await Advertisement.is_owner(user_id, adv_id)
+        validate({'adv_owner': advertisement_owner}, CheckOwner)
         await advertisement_owner.update(**validated_data).apply()
         return web.json_response(advertisement_owner.to_dict())
 
     async def delete(self):
         token = self.request.headers.get('Authorization')
         validated_data = validate({'token': token}, CheckToken)
+        user_id = await User.get_id(validated_data.pop('token'))
+        validate({"user_id": user_id}, CheckUserId)
         adv_id = int(self.request.match_info.get("adv_id"))
-        advertisement_owner = await Advertisement.is_owner(
-            validated_data.pop('token'), adv_id)
-
-        if advertisement_owner is None:
-            raise BadRequest(error="incorrect advertisement id")
-        elif not advertisement_owner:
-            raise Forbidden(error="permission denied")
+        advertisement_owner = await Advertisement.is_owner(user_id, adv_id)
+        validate({'adv_owner': advertisement_owner}, CheckOwner)
         await advertisement_owner.update(is_active=False).apply()
         return web.json_response(status=204)

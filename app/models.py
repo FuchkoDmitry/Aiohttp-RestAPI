@@ -23,9 +23,10 @@ class User(db.Model):
 
     @classmethod
     async def get_id(cls, token: str):
-        return await cls.select('id').where(
+        user_id = await cls.select('id').where(
             cls.token == token
         ).gino.scalar()
+        return user_id
 
     def to_dict(self):
         return {
@@ -56,8 +57,7 @@ class Advertisement(db.Model):
         }
 
     @classmethod
-    async def is_owner(cls, user_token: str, adv_id: int):
-        user_id = await User.get_id(user_token)
+    async def is_owner(cls, user_id: int, adv_id: int):
         advertisement = await Advertisement.query.where(
             and_(
                 Advertisement.id == adv_id,
@@ -69,4 +69,3 @@ class Advertisement(db.Model):
         elif advertisement.owner_id != user_id:
             return False
         return advertisement
-

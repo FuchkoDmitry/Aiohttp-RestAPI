@@ -3,9 +3,9 @@ POST http://127.0.0.1:8080/register/
 Content-Type: application/json
 
 {
-  "username": "user1",
+  "username": "user2",
   "password": "1234fF#1D",
-  "email": "custom_mail@yandex.ru"
+  "email": "customs_mail@yandex.ru"
 }
 
 ###
@@ -22,7 +22,7 @@ Content-Type: application/json
 # создание объявления
 POST http://127.0.0.1:8080/advertisements/
 Content-Type: application/json
-Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850
+Authorization: Token 0de81058-bed8-4ba0-be09-6c6eb70bbbb7
 
 {
   "title": "new_adv",
@@ -33,7 +33,7 @@ Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850
 # обновить объявление
 PATCH http://127.0.0.1:8080/advertisements/2/
 Content-Type: application/json
-Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850
+Authorization: Token 0de81058-bed8-4ba0-be09-6c6eb70bbbb7
 
 {
   "title": "updated title",
@@ -47,12 +47,12 @@ Content-Type: application/json
 
 ###
 # получить одно объявление
-GET http://127.0.0.1:8080/advertisements/1/
+GET http://127.0.0.1:8080/advertisements/2/
 Content-Type: application/json
 
 
 ###
 # удалить объявление
-DELETE http://127.0.0.1:8080/advertisements/2/
+DELETE http://127.0.0.1:8080/advertisements/7/
 Content-Type: application/json
-Authorization: Token 08950add-b3fb-4967-bc06-2cca65a1f850
+Authorization: Token 0de81058-bed8-4ba0-be09-6c6eb70bbbb7

@@ -1,3 +1,5 @@
-env/*
-__pycache__
+*env/*
+*__pycache__*
 modules/*
+*.idea*
+README.md
